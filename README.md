@@ -11,24 +11,30 @@ The Bellabeat app provides users with health data related to their activity, sle
 
 ### 2.Prepare
 
-### 3.Pprocess
+### 3.Process
 
 ### 4.Analyse
 
 ### 5.Share 
 
 ### 6. Act
-
+# The Graphs 
 
 ![image](https://github.com/sheikhrabiaassad/Bellabeat-Project/assets/132212867/fc330c67-23ec-45c0-b7ff-e0ac9b9528f6)
+We can see a positive correlation between steps and calories burned. As assumed the more steps walked the more calories may be burnt.
 
 ![image](https://github.com/sheikhrabiaassad/Bellabeat-Project/assets/132212867/a01a0813-518b-4f47-8f5e-748ba08e2c13)
+we can see there is no clear relation between minutes slept and steps walked.
+
 
 ![image](https://github.com/sheikhrabiaassad/Bellabeat-Project/assets/132212867/763397ec-942a-42fc-95b1-c13eb5f5eed5)
+This shows the percentage of different user types .
 
 ![image](https://github.com/sheikhrabiaassad/Bellabeat-Project/assets/132212867/f7646120-6e6a-436e-920c-c9800201d362)
+This graph clearly indicates the highly acyive usertype falls sleep easily (lowest awake time)and the sedentary usertype falls takes much time to fall asleep(highest awake time). Thus the graph clearly shows a correlation between usertype and awake time(the more the activity ,the less time to fall asleep).
 
-
+![image](https://github.com/sheikhrabiaassad/Bellabeat-Project/assets/132212867/059f971c-7f1e-4730-95c5-7e5c73a3412c)
+The graph clearly indicates the users are most active during 5 to 7 pm (evening time).
 
 
 # Conclusion / Act 
