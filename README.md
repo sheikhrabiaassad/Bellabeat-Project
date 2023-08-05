@@ -5,6 +5,7 @@ Bellabeat is a high-tech company that manufactures health-focused smart products
 The main focus of this case study is to analyze smart device usage data in order to gain insight into how consumers use non-Bellabeat smart devices and determine how it could help unlock new growth opportunities for Bellabeat. We will focus on one of Bellabeat’s products: Bellabeat App
 
 The Bellabeat app provides users with health data related to their activity, sleep, stress,menstrual cycle, and mindfulness habits. This data can help users understand their current habits and make healthy decisions in a better way.
+
 ## Steps of Analysis :
 
 ### 1.Ask
@@ -18,6 +19,7 @@ The Bellabeat app provides users with health data related to their activity, sle
 ### 5.Share 
 
 ### 6. Act
+
 # The Graphs 
 
 ![image](https://github.com/sheikhrabiaassad/Bellabeat-Project/assets/132212867/fc330c67-23ec-45c0-b7ff-e0ac9b9528f6)
