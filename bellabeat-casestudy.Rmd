@@ -1,0 +1,355 @@
+---
+title: 'HOW CAN BELLABEAT PLAY IT SMART'
+author: "Sheikh Rabia Assad"
+date: "2023-03-06"
+output:
+  html_document: 
+    theme: journal
+    highlight: espresso
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# 1.SUMMARY
+
+Bellabeat is a high-tech company that manufactures health-focused smart products.They offer different smart devices that collect data on activity, sleep, stress and reproductive health to empower women with knowledge about their own health and habits.
+
+The main focus of this case study is to analyze smart device usage data in order to gain insight into how consumers use non-Bellabeat smart devices and determine how it could help unlock new growth opportunities for Bellabeat. We will focus on one of Bellabeat's products: **Bellabeat App**
+
+The Bellabeat app provides users with health data related to their activity, sleep, stress,menstrual cycle, and mindfulness habits. This data can help users understand their current habits and make healthy decisions in a better way.
+
+# 2.ASK PHASE
+
+### 2.1 Business Task
+
+Identifying trends in non-Bellabeat smart devices to gain insights and apply them into Bellabeat's marketing strategy.
+
+### 2.2 Stakeholders
+
+Urška Sršen: Bellabeat's cofounder and Chief Creative Officer.
+
+Sando Mur: Bellabeat's cofounder and key member of the Bellabeat executive team.
+
+Bellabeat marketing analytics team.
+
+# 3. PREPARE PHASE
+
+### 3.1 Dataset used
+
+The dataset used in this case study is FitBit Fitness Tracker data. This is a kaggle dataset made available through Mobius.
+
+### 3.2 Accessibility and Privacy of dataset
+
+It is an open source dataset and contains personal fitness tracker from thirty fitbit users. Thirty eligible Fitbit users consented to the submission of personal tracker data, including minute-level output for physical activity, heart rate, and sleep monitoring. It includes information about daily activity, steps and heart rate that can be used to explore users'habits.
+
+### 3.3 Data Organization
+
+The data contains 18 CSV documents. Each document represents different quantitative data tracked by Fitbit. The data is considered long since each row is one time point per subject so each subject will have data in multiple rows. Every user has a unique ID and different rows since data is tracked by day and time. 
+
+
+# 4. PROCESS PHASE
+
+We will focus our analysis in R due to  accessibility, amount of data and ability to create data visualization so that we can share our results with the stakeholders.
+
+### 4.1 Installing and Loading Packages.
+
+we will use the following packages for our analysis.
+
+1.tidyverse
+
+2.dplyr
+
+3.readr
+
+4.ggplot2
+
+```{r}
+library("tidyverse")
+library("dplyr")
+library("ggplot2")
+library("readr")
+```
+
+### 4.2 Importing Dataset
+
+The dataset contains 18 csv files but we will import the following files that will help us in our business task:
+
+1. Daily Calories
+
+2. Daily Activity
+
+3. Daily Intensities
+
+4. Weight
+
+5. Daily Sleep 
+
+6.Hourly steps
+
+
+```{r}
+ daily_activity <- read_csv("/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
+
+ daily_calories <- read_csv("/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/dailyCalories_merged.csv")
+ 
+ daily_intensities <- read_csv("/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/dailyIntensities_merged.csv")
+ 
+ weight <- read_csv("/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/weightLogInfo_merged.csv")
+ 
+  daily_sleep <- read_csv("/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/sleepDay_merged.csv")
+  
+ hourly_steps<- read_csv("/kaggle/input/fitbit/Fitabase Data 4.12.16-5.12.16/hourlySteps_merged.csv")
+
+```
+
+### 4.3 Overview of Dataset
+
+To get an idea about the number of columns and structure of dataset:
+
+```{r}
+head(daily_activity)
+str(daily_activity)
+
+head( daily_calories)
+str(daily_calories)
+
+head( daily_intensities)
+str( daily_intensities)
+
+head( weight )
+str( weight )
+
+head( daily_sleep)
+str( daily_sleep)
+
+head( hourly_steps)
+str( hourly_steps)
+
+```
+
+### 4.4 Cleaning Dataset
+
+#### 4.4.1 Checking for Distinct Enteries
+
+let us find out the number of distinct enteries in each dataset.
+
+```{r}
+daily_calories %>% 
+  summarise(n_distinct(Id))
+
+daily_activity %>% 
+  summarise(n_distinct(Id))
+
+ weight %>% 
+   summarise(n_distinct(Id))
+ 
+daily_intensities %>% 
+  summarise(n_distinct(Id))
+
+daily_sleep %>% 
+  summarize(n_distinct(Id))
+
+hourly_steps %>% 
+  summarize(n_distinct(Id))
+```
+
+Since weight has only 8 distinct users which implies that its sample size is very small,thus we will not consider it while analyzing the data.
+
+#### 4.4.2 Renaming Columns
+
+Since we have to merge datasets,its important that the column names should have the same format for that we will rename the column names.
+
+```{r}
+
+ daily_calories=rename_with(daily_calories,tolower)
+
+ daily_activity=rename_with(daily_activity,tolower)
+ 
+daily_intensities=rename_with(daily_intensities,tolower)
+
+daily_sleep=rename_with(daily_sleep,tolower)
+
+hourly_steps=rename_with(hourly_steps,tolower)
+
+```
+
+#### 4.4.3 Maintaining consistency of time and date columns
+
+In order to merge datasets we have to maintain the date and time in a single format.
+
+```{r}
+daily_activity = daily_activity %>%
+  rename(date = activitydate) %>%
+  mutate(date = as_date(date, format = "%m/%d/%Y"))
+
+daily_sleep <- daily_sleep %>%
+  rename(date = sleepday) %>%
+  mutate(date = as_date(date,format ="%m/%d/%Y %I:%M:%S %p" , tz=Sys.timezone()))
+
+hourly_steps=hourly_steps %>% 
+  rename(datetime =activityhour) %>% 
+    mutate(datetime= as.POSIXct(datetime,format ="%m/%d/%Y %I:%M:%S %p" , tz=Sys.timezone())) 
+  
+
+```
+
+### 4.5 Merging Datasets
+
+Now we will merge daily_activity and daily_sleep by their common columns and get a single dataset to analyse.
+
+```{r}
+daily_activity_sleep=merge(daily_activity,daily_sleep,by=c("date","id"))
+head(daily_activity_sleep)
+```
+
+# 5. ANALYSIS AND SHARE PHASE
+
+### 5.1 Comparison of Totalsteps with Calories and Sleep
+
+**To check any correlation between totalsteps and calories** :
+
+```{r}
+ggplot(data = daily_activity_sleep,aes(x=totalsteps,y=calories))+
+  geom_point()+
+  geom_smooth(colour="red")+
+labs(titles="TOTAL STEPS VS CALORIES")
+```
+
+We can see a positive correlation between steps and calories burned. As assumed the more steps walked the more calories may be burnt.
+
+**To check any correlation between totalsteps and minutes slept**
+
+```{r}
+daily_activity_sleep %>% 
+ggplot(aes(x=totalsteps,y=totalminutesasleep))+
+  geom_point()+
+  geom_smooth(colour="red")+
+  labs(titles="TOTAL STEPS VS MINUTUES ASLEEP")
+```
+
+we can see there is no clear relation between minutes slept and steps walked.
+
+### 5.2 User type based on Activity
+
+According to website "10000 Steps Australia": The following pedometer indices have been developed to provide a guideline on steps and activity levels:
+
+Sedentary is less than 5,000 steps per day,Low active is 5,000 to 7,499 steps per day, Somewhat active is 7,500 to 9,999 steps per day,Active is more than 10,000 steps per day and Highly active is more than 12,500.
+
+let us categories our user type on this basis.
+
+```{r}
+ mean_activity=daily_activity_sleep %>% 
+  group_by(id) %>% 
+summarise(meandailysteps=mean(totalsteps),meandailycalories=mean(calories)) %>% 
+mutate(usertype=
+          case_when(meandailysteps<5000~"Sedentary",
+            meandailysteps>=5000 & meandailysteps < 7499~"Low active",
+                 meandailysteps>=7500&meandailysteps<9999~"Some what active",
+                     meandailysteps>=10000&meandailysteps<12500~"Active",
+                     meandailysteps>12500~"Highly Active" )) 
+         
+         head(mean_activity)
+         
+         
+  
+
+```
+
+Now let us find percentage of each user type .
+
+```{r}
+usertype_percent= mean_activity %>% 
+  group_by(usertype) %>% 
+ summarise(total=n()) %>% 
+   mutate(totals=sum(total)) %>% 
+        mutate(percent=total/totals*100)
+head(usertype_percent)
+ 
+```
+
+Now graphically this can be represented as:
+
+```{r}
+ggplot(data=usertype_percent)+
+  geom_col(mapping=aes(x=usertype,y=percent,fill=usertype,))+
+  labs(titles="PERCENTAGE OF EACH USERTYPE")
+```
+
+### 5.3 Time in Bed vs Total Minutes Asleep.
+
+From the dataset(daily_sleep),we can clearly see total time in bed is different from total minutes asleep . let us figure out the difference between the two.
+
+```{r}
+ mean_sleep=daily_activity_sleep %>% 
+  group_by(id) %>% 
+summarise(meantotalminutesasleep=mean(totalminutesasleep),meantimeinbed=mean(totaltimeinbed)) %>% 
+  mutate(awaketime=meantimeinbed-meantotalminutesasleep) 
+  head(mean_sleep)
+```
+
+Now let us compare the Awake time with the user type to check if there is any relation between the two. Awake time represents the time a person spends in bed before going to sleep.
+
+To draw comparison,let us merge mean_activity and mean_sleep .
+
+```{r}
+mean_activity_sleep=merge(mean_activity,mean_sleep,by="id")
+head(mean_activity_sleep)
+```
+
+```{r}
+ggplot(data=mean_activity_sleep)+
+geom_col(mapping=aes(x=usertype,y=awaketime,fill=usertype))+
+  labs(title="AWAKE TIME OF DIFFERENT USERTYPES")
+  
+  
+
+```
+This graph clearly indicates the highly acyive usertype falls sleep easily (lowest awake time)and the sedentary usertype falls takes much time to fall asleep(highest awake time).
+Thus the graph clearly shows a correlation between usertype and awake time(the more the activity ,the less time to fall asleep).
+
+### 5.4 Most Active Hours of the Day.
+
+Let us find out the time of the day at which the user is most active. 
+```{r}
+mean_hourly_steps=hourly_steps %>% 
+  separate(datetime,into=c("date","time"),sep=" ") %>% 
+  group_by(time) %>% 
+  summarise(averagestep=mean(steptotal))
+```
+
+```{r}
+ggplot(data=mean_hourly_steps)+ 
+  geom_col(mapping=aes(x=time,y=averagestep,fill=averagestep))+
+  labs(title="HOURLY STEPS THROUGH OUT THE DAY")+
+   scale_fill_gradient(low = "green", high = "red")+
+   theme(axis.text.x = element_text(angle = 90))
+```
+The graph clearly indicates the users are most active during 5 to 7 pm (evening time).
+
+# 6 ACT PHASE
+### MY Conclusion on the analysis:
+
+- As there is a positive correlation between total steps taken and calories burnt ,we can add an indicator in the app showing the calories burnt for daily steps taken thus encouraging users to walk .
+
+- We can create an activity based Reward System.Users can collect reward points for each activity and after achieving a specific milestone ,the company can reward the user with gift hampers thus encouraging users to do more activity.
+
+- We can send notification on the app reminding users to sleep on time . 
+
+- The app should be designed in a way that it shows the benefit of activity on sleeping pattern and stress level.
+
+- As users are more active during evening,we can send notification in evening about the benefits of walk and the effect it has on overall health of the user encouraging them to take a walk.
+
+- We can add some fitness related podcasts and exercise,yoga videos to the app. .
+
+ 
+
+
+**SESSION INFORMATION**:
+
+```{r}
+sessionInfo()
+```
